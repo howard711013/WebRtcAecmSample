@@ -8,6 +8,7 @@ import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.AudioTrack;
+import android.util.Log;
 
 public class AecPlayThread extends Thread{
 
@@ -17,10 +18,12 @@ public class AecPlayThread extends Thread{
 	
 	private AudioTrack mAudioTrack;
 	private AECM mAecm;
-	public void StartPlay(ArrayList<short[]> capture ,ArrayList<short[]> play)
+	private int mDelayTime;
+	public void StartPlay(ArrayList<short[]> capture ,ArrayList<short[]> play , int delayTime)
 	{
 		mCaptureBufferList = capture;
 		mPlayBufferList = play;
+		mDelayTime=delayTime;
 		
 		int minBufSize = AudioRecord.getMinBufferSize(SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
 
@@ -46,13 +49,16 @@ public class AecPlayThread extends Thread{
 			short[] capture = null;
 			short[] play;
 			short[] aec_out = new short[80];
-			if(i < mCaptureBufferList.size())capture = mCaptureBufferList.get(i);
+			if(i+1 < mCaptureBufferList.size())capture = mCaptureBufferList.get(i+1);
 			play = mPlayBufferList.get(i);
 			
 			if(capture!=null)
 			{
+long startTime = System.nanoTime()/1000/1000;				
 				mAecm.Capture(capture);
-				mAecm.Play(play, aec_out, 0);
+				mAecm.Play(play, aec_out, mDelayTime);
+long endTime = System.nanoTime()/1000/1000;				
+Log.d("test","delay time = " + (int)(endTime - startTime));
 				mAudioTrack.write(aec_out, 0, aec_out.length);
 				
 			}else{

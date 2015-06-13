@@ -9,6 +9,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.EditText;
 import android.widget.Switch;
 
 public class MainActivity extends Activity implements OnCheckedChangeListener, OnClickListener {
@@ -21,6 +22,7 @@ public class MainActivity extends Activity implements OnCheckedChangeListener, O
 	
 	private AecPlayThread mAecPlayThread;
 	
+	private EditText mDelayTime;
 	private Switch mRecord1;
 	private Switch mRecord2;
 	private Button mPlay1;
@@ -36,6 +38,7 @@ public class MainActivity extends Activity implements OnCheckedChangeListener, O
 		mPlay1 =(Button)this.findViewById(R.id.bt_play1);
 		mPlay2 =(Button)this.findViewById(R.id.bt_play2);
 		mAecPlay = (Button)this.findViewById(R.id.bt_aec_play);
+		mDelayTime = (EditText)this.findViewById(R.id.txt_delaytime);
 		
 		mRecord1.setOnCheckedChangeListener(this);
 		mRecord2.setOnCheckedChangeListener(this);
@@ -98,8 +101,14 @@ public class MainActivity extends Activity implements OnCheckedChangeListener, O
 			break;
 			case R.id.bt_aec_play:
 			{
+				String delayTime = mDelayTime.getText().toString();
+				int delay = 0;
+				
+				if(delayTime.isEmpty()==false)delay = Integer.parseInt(delayTime);
+				
+				
 				mAecPlayThread = new AecPlayThread();
-				mAecPlayThread.StartPlay(mRecordThread1.getBufferList(), mRecordThread2.getBufferList());
+				mAecPlayThread.StartPlay(mRecordThread1.getBufferList(), mRecordThread2.getBufferList(),delay);
 			}
 		}
 		
