@@ -46,7 +46,7 @@ public class RecordThread extends Thread{
 		
 		while(isRecording)
 		{
-			short[] buf = new short[80];
+			short[] buf = new short[160];
 			mAudioRecord.read(buf,0, buf.length);
 			mBufferList.add(buf);
 		}

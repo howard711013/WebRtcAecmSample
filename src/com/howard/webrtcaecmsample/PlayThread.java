@@ -4,10 +4,7 @@ import java.util.ArrayList;
 
 import android.media.AudioFormat;
 import android.media.AudioManager;
-import android.media.AudioRecord;
 import android.media.AudioTrack;
-import android.media.MediaRecorder;
-import android.media.audiofx.NoiseSuppressor;
 
 public class PlayThread extends Thread{
 

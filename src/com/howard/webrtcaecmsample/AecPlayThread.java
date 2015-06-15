@@ -48,17 +48,14 @@ public class AecPlayThread extends Thread{
 		{
 			short[] capture = null;
 			short[] play;
-			short[] aec_out = new short[80];
+			short[] aec_out = new short[160];
 			if(i+1 < mCaptureBufferList.size())capture = mCaptureBufferList.get(i+1);
 			play = mPlayBufferList.get(i);
 			
 			if(capture!=null)
 			{
-long startTime = System.nanoTime()/1000/1000;				
 				mAecm.Capture(capture);
 				mAecm.Play(play, aec_out, mDelayTime);
-long endTime = System.nanoTime()/1000/1000;				
-Log.d("test","delay time = " + (int)(endTime - startTime));
 				mAudioTrack.write(aec_out, 0, aec_out.length);
 				
 			}else{
