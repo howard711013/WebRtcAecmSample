@@ -30,7 +30,7 @@ public class AecPlayThread extends Thread{
 		mAudioTrack = new AudioTrack(
 				AudioManager.STREAM_MUSIC,
 				SAMPLE_RATE,
-				AudioFormat.CHANNEL_CONFIGURATION_MONO,
+				AudioFormat.CHANNEL_OUT_MONO,
 				AudioFormat.ENCODING_PCM_16BIT,
 				minBufSize,
 				AudioTrack.MODE_STREAM);

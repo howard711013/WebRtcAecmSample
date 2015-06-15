@@ -7,6 +7,7 @@ import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.AudioTrack;
 import android.media.MediaRecorder;
+import android.media.audiofx.NoiseSuppressor;
 
 public class PlayThread extends Thread{
 
@@ -18,12 +19,12 @@ public class PlayThread extends Thread{
 	{
 		mBufferList = buffers;
 		
-		int minBufSize = AudioRecord.getMinBufferSize(SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
+		int minBufSize = AudioTrack.getMinBufferSize(SAMPLE_RATE, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT);
 
 		mAudioTrack = new AudioTrack(
 				AudioManager.STREAM_MUSIC,
 				SAMPLE_RATE,
-				AudioFormat.CHANNEL_CONFIGURATION_MONO,
+				AudioFormat.CHANNEL_OUT_MONO,
 				AudioFormat.ENCODING_PCM_16BIT,
 				minBufSize,
 				AudioTrack.MODE_STREAM);
