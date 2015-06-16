@@ -2,6 +2,7 @@ package com.howard.webrtcaecmsample;
 
 import java.util.ArrayList;
 
+import com.tutk.webrtc.AEC;
 import com.tutk.webrtc.AECM;
 
 import android.media.AudioFormat;
@@ -17,7 +18,7 @@ public class AecPlayThread extends Thread{
 	private ArrayList<short[]> mPlayBufferList;
 	
 	private AudioTrack mAudioTrack;
-	private AECM mAecm;
+	private AEC mAec;
 	private int mDelayTime;
 	public void StartPlay(ArrayList<short[]> capture ,ArrayList<short[]> play , int delayTime)
 	{
@@ -40,22 +41,22 @@ public class AecPlayThread extends Thread{
 	
 	public void run()
 	{
-		mAecm = new AECM();
-		mAecm.Create(SAMPLE_RATE);
+		mAec = new AEC();
+		mAec.Create(SAMPLE_RATE);
 		mAudioTrack.play();
 
 		for(int i=0;i<mPlayBufferList.size();i++)
 		{
 			short[] capture = null;
 			short[] play;
-			short[] aec_out = new short[160];
-			if(i+1 < mCaptureBufferList.size())capture = mCaptureBufferList.get(i+1);
+			short[] aec_out = new short[320];
+			if(i < mCaptureBufferList.size())capture = mCaptureBufferList.get(i);
 			play = mPlayBufferList.get(i);
 			
 			if(capture!=null)
 			{
-				mAecm.Capture(capture);
-				mAecm.Play(play, aec_out, mDelayTime);
+				Log.d("test","capture : " + mAec.Capture(capture));
+				Log.d("test","play :" + mAec.Play(play, aec_out, mDelayTime));
 				mAudioTrack.write(aec_out, 0, aec_out.length);
 				
 			}else{
@@ -64,7 +65,7 @@ public class AecPlayThread extends Thread{
 		}
 
 		mAudioTrack.stop();
-		mAecm.release();
+		mAec.release();
 	}
 
 }
