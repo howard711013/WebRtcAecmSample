@@ -13,7 +13,8 @@ public class RecordThread extends Thread{
 	private boolean isRecording=false;
 	
 	private AudioRecord mAudioRecord;
-	public void StartRecord()
+	private int mDelayTimeMs;
+	public void StartRecord(int time_ms)
 	{
 		int minBufSize = AudioRecord.getMinBufferSize(SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
 
@@ -24,7 +25,7 @@ public class RecordThread extends Thread{
                 AudioFormat.ENCODING_PCM_16BIT,
                 minBufSize);
 		
-		
+		mDelayTimeMs = time_ms;
 		mBufferList  = new ArrayList<short[]>();
 		isRecording=true;
 		start();
@@ -49,6 +50,12 @@ public class RecordThread extends Thread{
 			short[] buf = new short[320];
 			mAudioRecord.read(buf,0, buf.length);
 			mBufferList.add(buf);
+			try {
+				Thread.sleep(mDelayTimeMs);
+			} catch (InterruptedException e) {
+				// TODO 自動產生的 catch 區塊
+				e.printStackTrace();
+			}
 		}
 		mAudioRecord.stop();
 	}

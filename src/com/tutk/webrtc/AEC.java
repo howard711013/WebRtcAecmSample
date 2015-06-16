@@ -47,28 +47,8 @@ public class AEC {
         return isInit;
     }
     
-    private long mRenderTime;
-    private long mAnalyzeTime;
-    private long mProcessTime;
     private long mCaptureTime;
 
-    /**
-     * 
-     * @param t_render is the time the first sample of the same frame is rendered by the audio hardware ,if not set , set the value to -1.
-     * @param t_analyze is the time a frame is passed to AnalyzeReverseStream() , if not set , set the value to -1.
-     * @param t_process s the time the same frame is passed to ProcessStream() ,if not set , set the value to -1.
-     * @param t_capture is the time the first sample of a frame is captured by the audio hardware ,if not set , set the value to -1.
-     */
-    public void setDelayTime(long t_render, long t_analyze , long t_process , long t_capture)
-    {
-    	mLock.lock();
-    	if(t_render !=-1)mRenderTime = t_render;
-    	if(t_analyze!=-1)mAnalyzeTime = t_analyze;
-    	if(t_process!=-1)mProcessTime = t_process;
-    	if(t_capture!=-1)mCaptureTime = t_capture;
-    	mLock.unlock();
-    	
-    }
     
     public boolean Create(int sampleRate)
     {
@@ -84,37 +64,40 @@ public class AEC {
         return true;
     }
     
-    public boolean Capture(short[] input)
+    public boolean Capture(short[] input , long time_ms)
     {
         
         mLock.lock();
         mCaptureBuffer = input;
+        mCaptureTime= time_ms;
         mLock.unlock();
         return true;
     }
     
-    public boolean Play(short[] noisy , short[] out , int delay_time)
+    boolean isCapture = false;
+    public boolean Play(short[] noisy , short[] out , long delay_time)
     {
         mLock.lock();
         int ret = -1;
         int size = noisy.length;
-        int total_time = (int) ((mRenderTime - mAnalyzeTime) + (mProcessTime - mCaptureTime));
+        int total_time = (int) (delay_time - mCaptureTime);
 Log.d("test","total_time = " + total_time);        
         
         for(int i=0;i<size/BUFFER_SIZE ; i++)
         {
-            
             short[] buf_cap = new short[BUFFER_SIZE];
             
             System.arraycopy(mCaptureBuffer, BUFFER_SIZE*i, buf_cap, 0, BUFFER_SIZE);
             nativeCapture(mHandle,buf_cap,BUFFER_SIZE);
-            
+
             short[] buf = new short[BUFFER_SIZE];
             short[] buf_out =new short[BUFFER_SIZE];
             System.arraycopy(noisy, BUFFER_SIZE*i, buf, 0, BUFFER_SIZE);
             
-            ret = nativePlay(mHandle,buf,buf_out,BUFFER_SIZE,delay_time);
+            ret = nativePlay(mHandle,buf,buf_out,BUFFER_SIZE,total_time);
             System.arraycopy(buf_out, 0, out, BUFFER_SIZE*i, BUFFER_SIZE);
+            
+
         }
         Log.d("test2","nativePlay = " + ret);
         mLock.unlock();

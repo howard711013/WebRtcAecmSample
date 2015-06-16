@@ -55,8 +55,8 @@ public class AecPlayThread extends Thread{
 			
 			if(capture!=null)
 			{
-				Log.d("test","capture : " + mAec.Capture(capture));
-				Log.d("test","play :" + mAec.Play(play, aec_out, mDelayTime));
+				Log.d("test","capture : " + mAec.Capture(capture , System.nanoTime()/1000/1000));
+				Log.d("test","play :" + mAec.Play(play, aec_out, System.nanoTime()/1000/1000));
 				mAudioTrack.write(aec_out, 0, aec_out.length);
 				
 			}else{

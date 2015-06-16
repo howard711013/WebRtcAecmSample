@@ -59,7 +59,7 @@ public class MainActivity extends Activity implements OnCheckedChangeListener, O
 				if(isChecked)
 				{
 					mRecordThread1 = new RecordThread();
-					mRecordThread1.StartRecord();
+					mRecordThread1.StartRecord(0);
 				}else{
 					mRecordThread1.StopRecord();
 				}
@@ -72,7 +72,7 @@ public class MainActivity extends Activity implements OnCheckedChangeListener, O
 					mPlayThread1 = new PlayThread();
 					mPlayThread1.StartPlay(mRecordThread1.getBufferList());
 					mRecordThread2 = new RecordThread();
-					mRecordThread2.StartRecord();
+					mRecordThread2.StartRecord(20);
 				}else{
 					mRecordThread2.StopRecord();
 				}
