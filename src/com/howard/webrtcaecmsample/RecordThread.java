@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
+import android.util.Log;
 
 public class RecordThread extends Thread{
 
@@ -14,6 +15,8 @@ public class RecordThread extends Thread{
 	
 	private AudioRecord mAudioRecord;
 	private int mDelayTimeMs;
+	
+	private Object mKeyLock;
 	public void StartRecord(int time_ms)
 	{
 		int minBufSize = AudioRecord.getMinBufferSize(SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
@@ -31,6 +34,11 @@ public class RecordThread extends Thread{
 		start();
 	}
 	
+	public void SetLockKey(Object key)
+	{
+		mKeyLock = key;
+	}
+	
 	public void StopRecord()
 	{
 		isRecording=false;
@@ -45,18 +53,32 @@ public class RecordThread extends Thread{
 	{
 		mAudioRecord.startRecording();
 		
+
 		while(isRecording)
 		{
-			short[] buf = new short[320];
-			mAudioRecord.read(buf,0, buf.length);
-			mBufferList.add(buf);
+			long s_time = System.nanoTime()/1000/1000;
+
 			try {
 				Thread.sleep(mDelayTimeMs);
 			} catch (InterruptedException e) {
 				// TODO 自動產生的 catch 區塊
 				e.printStackTrace();
 			}
+			short[] buf = new short[320];
+			mAudioRecord.read(buf,0, buf.length);
+			long e_time = System.nanoTime()/1000/1000;
+			Log.d("test2","time = " + (e_time - s_time));
+			mBufferList.add(buf);
+			
+			if(mKeyLock!=null)
+			{
+				synchronized(mKeyLock)
+				{
+					mKeyLock.notifyAll();
+				}
+			}
 		}
 		mAudioRecord.stop();
+		mKeyLock=null;
 	}
 }

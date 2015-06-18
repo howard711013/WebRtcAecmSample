@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.Toast;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.Switch;
@@ -22,7 +23,8 @@ public class MainActivity extends Activity implements OnCheckedChangeListener, O
 	
 	private AecPlayThread mAecPlayThread;
 	
-	private EditText mDelayTime;
+	private EditText mDelayTimeAec;
+	private EditText mDelayTimeRec2;
 	private Switch mRecord1;
 	private Switch mRecord2;
 	private Button mPlay1;
@@ -38,7 +40,8 @@ public class MainActivity extends Activity implements OnCheckedChangeListener, O
 		mPlay1 =(Button)this.findViewById(R.id.bt_play1);
 		mPlay2 =(Button)this.findViewById(R.id.bt_play2);
 		mAecPlay = (Button)this.findViewById(R.id.bt_aec_play);
-		mDelayTime = (EditText)this.findViewById(R.id.txt_delaytime);
+		mDelayTimeRec2=(EditText)this.findViewById(R.id.txt_delaytime_rec2);
+		mDelayTimeAec = (EditText)this.findViewById(R.id.txt_delaytime_aec);
 		
 		mRecord1.setOnCheckedChangeListener(this);
 		mRecord2.setOnCheckedChangeListener(this);
@@ -69,10 +72,17 @@ public class MainActivity extends Activity implements OnCheckedChangeListener, O
 			{
 				if(isChecked)
 				{
+					String delayTime = mDelayTimeRec2.getText().toString();
+					int delay = 0;
+					if(delayTime.isEmpty()==false)delay = Integer.parseInt(delayTime);
+					Object keyLock = new Object();
 					mPlayThread1 = new PlayThread();
+					//mPlayThread1.setLockKey(keyLock);
 					mPlayThread1.StartPlay(mRecordThread1.getBufferList());
+					
 					mRecordThread2 = new RecordThread();
-					mRecordThread2.StartRecord(20);
+					//mRecordThread2.setLockKey(keyLock);
+					mRecordThread2.StartRecord(delay);
 				}else{
 					mRecordThread2.StopRecord();
 				}
@@ -96,12 +106,12 @@ public class MainActivity extends Activity implements OnCheckedChangeListener, O
 			case R.id.bt_play2:
 			{
 				mPlayThread2 = new PlayThread();
-				mPlayThread2.StartPlay(mRecordThread2.getBufferList());				
+				mPlayThread2.StartPlay(mRecordThread2.getBufferList());
 			}
 			break;
 			case R.id.bt_aec_play:
 			{
-				String delayTime = mDelayTime.getText().toString();
+				String delayTime = mDelayTimeAec.getText().toString();
 				int delay = 0;
 				
 				if(delayTime.isEmpty()==false)delay = Integer.parseInt(delayTime);

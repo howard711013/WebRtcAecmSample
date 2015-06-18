@@ -35,14 +35,22 @@
         android:text="AEC Play" />
 
     <EditText
-        android:id="@+id/txt_delaytime"
+        android:id="@+id/txt_delaytime_aec"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:hint="Delay time"
+        android:hint="Aec Delay time"
         android:inputType="number" >
 
         <requestFocus />
     </EditText>
+
+    <EditText
+        android:id="@+id/txt_delaytime_rec2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Record2 Delay time"
+        android:inputType="number" />
 
 </LinearLayout>

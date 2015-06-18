@@ -19,12 +19,12 @@ public class AecPlayThread extends Thread{
 	
 	private AudioTrack mAudioTrack;
 	private AEC mAec;
-	private int mDelayTime;
-	public void StartPlay(ArrayList<short[]> capture ,ArrayList<short[]> play , int delayTime)
+	private int mDelayTimeAec;
+	public void StartPlay(ArrayList<short[]> capture ,ArrayList<short[]> play , int t_aec_ms)
 	{
 		mCaptureBufferList = capture;
 		mPlayBufferList = play;
-		mDelayTime=delayTime;
+		mDelayTimeAec=t_aec_ms;
 		
 		int minBufSize = AudioRecord.getMinBufferSize(SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
 
@@ -55,8 +55,8 @@ public class AecPlayThread extends Thread{
 			
 			if(capture!=null)
 			{
-				Log.d("test","capture : " + mAec.Capture(capture , System.nanoTime()/1000/1000));
-				Log.d("test","play :" + mAec.Play(play, aec_out, System.nanoTime()/1000/1000));
+				Log.d("test","capture : " + mAec.Capture(capture , 0));
+				Log.d("test","play :" + mAec.Play(play, aec_out, mDelayTimeAec));
 				mAudioTrack.write(aec_out, 0, aec_out.length);
 				
 			}else{
