@@ -7,6 +7,8 @@
 
 package com.tutk.webrtc;
 
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -39,8 +41,8 @@ public class AEC {
     
     private boolean isInit = false;
     private int mSampleRate;
-    private short[] mCaptureBuffer;
-    private Lock mLock = new ReentrantLock();
+    //private Lock mLock = new ReentrantLock();
+    private Queue<short[]> mCaptureBuffers = new LinkedList<short[]>();
     public AEC()
     {
         isInit = false;
@@ -74,30 +76,38 @@ public class AEC {
     
     public boolean Capture(short[] input , long time_ms)
     {
+        short[] buf = new short[input.length];
+        System.arraycopy(input, 0, buf, 0, input.length);
         
-        mLock.lock();
-        mCaptureBuffer = input;
+        if(mCaptureBuffers.size()==8)
+        {
+        	mCaptureBuffers.remove();
+        	Log.d("test","FIFO remove : " + mCaptureBuffers.size());
+        }
+        
+        mCaptureBuffers.add(buf);
+        Log.d("test","FIFO add : " + mCaptureBuffers.size());
         mCaptureTime= time_ms;
-        mLock.unlock();
         return true;
     }
     
-    boolean isCapture = false;
     public boolean Play(short[] noisy , short[] out , long delay_time)
     {
-        mLock.lock();
+    	short[] cap_buf = new short[noisy.length];
+    	if(mCaptureBuffers.size()>=8)
+    	{
+    		cap_buf = mCaptureBuffers.remove();
+    	}    	
+		
         int ret = -1;
         int size = noisy.length;
         int total_time = (int) (delay_time - mCaptureTime);
 		int residue = total_time%MIN_BUFFER_TIME_MS;
 		int timeBlockCount = total_time/MIN_BUFFER_TIME_MS;
-Log.d("test","total_time = " + total_time + "," + timeBlockCount + "," + residue);        
-		
+
         for(int i=0;i<size/BUFFER_SIZE ; i++)
         {
-        	short[] buf_cap = getCaptureBlockBuffer(mCaptureBuffer ,timeBlockCount + i ,BUFFER_SIZE);
-            //short[] buf_cap = new short[BUFFER_SIZE];
-            //System.arraycopy(mCaptureBuffer, BUFFER_SIZE*i, buf_cap, 0, BUFFER_SIZE);
+        	short[] buf_cap = getCaptureBlockBuffer(cap_buf ,timeBlockCount + i ,BUFFER_SIZE);
             nativeCapture(mHandle,buf_cap,BUFFER_SIZE);
 
             short[] buf = new short[BUFFER_SIZE];
@@ -107,9 +117,7 @@ Log.d("test","total_time = " + total_time + "," + timeBlockCount + "," + residue
             ret = nativePlay(mHandle,buf,buf_out,BUFFER_SIZE,residue);
             System.arraycopy(buf_out, 0, out, BUFFER_SIZE*i, BUFFER_SIZE);
         }
-        Log.d("test2","nativePlay = " + ret);
-        mLock.unlock();
-        return ret ==0;		
+        return ret ==0;	
     }
 
     /**

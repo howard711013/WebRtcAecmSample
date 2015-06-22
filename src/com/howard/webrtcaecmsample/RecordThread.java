@@ -2,6 +2,8 @@ package com.howard.webrtcaecmsample;
 
 import java.util.ArrayList;
 
+import com.tutk.webrtc.AEC;
+
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
@@ -16,7 +18,8 @@ public class RecordThread extends Thread{
 	private AudioRecord mAudioRecord;
 	private int mDelayTimeMs;
 	
-	private Object mKeyLock;
+	private AEC mAec;
+	
 	public void StartRecord(int time_ms)
 	{
 		int minBufSize = AudioRecord.getMinBufferSize(SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
@@ -34,9 +37,9 @@ public class RecordThread extends Thread{
 		start();
 	}
 	
-	public void SetLockKey(Object key)
+	public void setAec(AEC aec)
 	{
-		mKeyLock = key;
+		mAec = aec;
 	}
 	
 	public void StopRecord()
@@ -56,29 +59,19 @@ public class RecordThread extends Thread{
 
 		while(isRecording)
 		{
-			long s_time = System.nanoTime()/1000/1000;
-
-			try {
-				Thread.sleep(mDelayTimeMs);
-			} catch (InterruptedException e) {
-				// TODO 自動產生的 catch 區塊
-				e.printStackTrace();
-			}
 			short[] buf = new short[320];
 			mAudioRecord.read(buf,0, buf.length);
-			long e_time = System.nanoTime()/1000/1000;
-			Log.d("test2","time = " + (e_time - s_time));
-			mBufferList.add(buf);
 			
-			if(mKeyLock!=null)
+			short[] out_buf = new short[320];
+			if(mAec!=null)
 			{
-				synchronized(mKeyLock)
-				{
-					mKeyLock.notifyAll();
-				}
+				mAec.Play(buf, out_buf, 0);
+			}else{
+				System.arraycopy(buf, 0, out_buf, 0, out_buf.length);
 			}
+			mBufferList.add(out_buf);
+			
 		}
 		mAudioRecord.stop();
-		mKeyLock=null;
 	}
 }

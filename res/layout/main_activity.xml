@@ -8,13 +8,7 @@
         android:id="@+id/sw_record1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Record buffer 1" />
-
-    <Switch
-        android:id="@+id/sw_record2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Record buffer 2" />
+        android:text="Record" />
 
     <Button
         android:id="@+id/bt_play1"
@@ -22,14 +16,14 @@
         android:layout_height="wrap_content"
         android:text="Play buffer1" />
 
-    <Button
-        android:id="@+id/bt_play2"
+    <Switch
+        android:id="@+id/sw_record2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Play buffer2" />
+        android:text="AEC Record" />
 
     <Button
-        android:id="@+id/bt_aec_play"
+        android:id="@+id/bt_play2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="AEC Play" />

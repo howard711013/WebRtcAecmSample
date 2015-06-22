@@ -2,6 +2,8 @@ package com.howard.webrtcaecmsample;
 
 import java.util.ArrayList;
 
+import com.tutk.webrtc.AEC;
+
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
@@ -12,7 +14,8 @@ public class PlayThread extends Thread{
 	private static final int SAMPLE_RATE = 8000;
 	private ArrayList<short[]> mBufferList;
 	private AudioTrack mAudioTrack;
-	private Object mKeyLock;
+	
+	private AEC mAec;
 	public void StartPlay(ArrayList<short[]> buffers)
 	{
 		mBufferList = buffers;
@@ -30,34 +33,26 @@ public class PlayThread extends Thread{
 		start();
 	}
 	
-	public void SetLockKey(Object key)
+	public void setAec(AEC aec)
 	{
-		mKeyLock = key;
+		mAec = aec;
 	}
 	
 	public void run()
 	{
 		mAudioTrack.play();
 
+
 		for(short[] buf : mBufferList)
 		{
+			long s_time = System.nanoTime()/1000/1000;
+			if(mAec!=null)mAec.Capture(buf, 0);
 			mAudioTrack.write(buf, 0, buf.length);
+			long e_time = System.nanoTime()/1000/1000;
+			Log.d("test2","write time : " + (int)(e_time-s_time));
 			
-			if(mKeyLock!=null)
-			{
-				synchronized(mKeyLock)
-				{
-					try {
-						mKeyLock.wait(1000);
-					} catch (InterruptedException e) {
-						// TODO 自動產生的 catch 區塊
-						e.printStackTrace();
-					}
-				}
-			}
 		}
 		mAudioTrack.stop();
-		mKeyLock=null;
 	}
 
 }

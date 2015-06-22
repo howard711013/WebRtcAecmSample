@@ -1,5 +1,7 @@
 package com.howard.webrtcaecmsample;
 
+import com.tutk.webrtc.AEC;
+
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -15,13 +17,13 @@ import android.widget.Switch;
 
 public class MainActivity extends Activity implements OnCheckedChangeListener, OnClickListener {
 
+	public static final int SAMPLE_RATE = 8000;
+	
 	private RecordThread mRecordThread1;
 	private RecordThread mRecordThread2;
 	
 	private PlayThread mPlayThread1;
 	private PlayThread mPlayThread2;
-	
-	private AecPlayThread mAecPlayThread;
 	
 	private EditText mDelayTimeAec;
 	private EditText mDelayTimeRec2;
@@ -29,7 +31,7 @@ public class MainActivity extends Activity implements OnCheckedChangeListener, O
 	private Switch mRecord2;
 	private Button mPlay1;
 	private Button mPlay2;
-	private Button mAecPlay;
+	private AEC mAec;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -39,7 +41,6 @@ public class MainActivity extends Activity implements OnCheckedChangeListener, O
 		mRecord2 =(Switch)this.findViewById(R.id.sw_record2);
 		mPlay1 =(Button)this.findViewById(R.id.bt_play1);
 		mPlay2 =(Button)this.findViewById(R.id.bt_play2);
-		mAecPlay = (Button)this.findViewById(R.id.bt_aec_play);
 		mDelayTimeRec2=(EditText)this.findViewById(R.id.txt_delaytime_rec2);
 		mDelayTimeAec = (EditText)this.findViewById(R.id.txt_delaytime_aec);
 		
@@ -48,7 +49,9 @@ public class MainActivity extends Activity implements OnCheckedChangeListener, O
 		
 		mPlay1.setOnClickListener(this);
 		mPlay2.setOnClickListener(this);
-		mAecPlay.setOnClickListener(this);
+		
+		mAec = new AEC();
+		mAec.Create(SAMPLE_RATE);
 	}
 
 	@Override
@@ -68,21 +71,19 @@ public class MainActivity extends Activity implements OnCheckedChangeListener, O
 				}
 			}
 			break;
-			case R.id.sw_record2:
+			case R.id.sw_record2: // aec record
 			{
 				if(isChecked)
 				{
 					String delayTime = mDelayTimeRec2.getText().toString();
 					int delay = 0;
 					if(delayTime.isEmpty()==false)delay = Integer.parseInt(delayTime);
-					Object keyLock = new Object();
-					mPlayThread1 = new PlayThread();
-					//mPlayThread1.setLockKey(keyLock);
-					mPlayThread1.StartPlay(mRecordThread1.getBufferList());
-					
 					mRecordThread2 = new RecordThread();
-					//mRecordThread2.setLockKey(keyLock);
+					mRecordThread2.setAec(mAec);
+					
 					mRecordThread2.StartRecord(delay);
+					
+					
 				}else{
 					mRecordThread2.StopRecord();
 				}
@@ -100,28 +101,25 @@ public class MainActivity extends Activity implements OnCheckedChangeListener, O
 			case R.id.bt_play1:
 			{
 				mPlayThread1 = new PlayThread();
+				mPlayThread1.setAec(mAec);
 				mPlayThread1.StartPlay(mRecordThread1.getBufferList());
 			}
 			break;
-			case R.id.bt_play2:
+			case R.id.bt_play2: // aec play
 			{
 				mPlayThread2 = new PlayThread();
 				mPlayThread2.StartPlay(mRecordThread2.getBufferList());
 			}
 			break;
-			case R.id.bt_aec_play:
-			{
-				String delayTime = mDelayTimeAec.getText().toString();
-				int delay = 0;
-				
-				if(delayTime.isEmpty()==false)delay = Integer.parseInt(delayTime);
-				
-				
-				mAecPlayThread = new AecPlayThread();
-				mAecPlayThread.StartPlay(mRecordThread1.getBufferList(), mRecordThread2.getBufferList(),delay);
-			}
 		}
 		
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		
+		mAec.release();
 	}
 	
 	
