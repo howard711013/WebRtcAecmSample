@@ -41,15 +41,21 @@ public class PlayThread extends Thread{
 	public void run()
 	{
 		mAudioTrack.play();
-
-
+		long start = System.nanoTime()/1000/1000;
 		for(short[] buf : mBufferList)
 		{
-			long s_time = System.nanoTime()/1000/1000;
-			if(mAec!=null)mAec.Capture(buf, 0);
+
 			mAudioTrack.write(buf, 0, buf.length);
-			long e_time = System.nanoTime()/1000/1000;
-			Log.d("test2","write time : " + (int)(e_time-s_time));
+			long end = System.nanoTime()/1000/1000;
+			Log.d("test2","audio play : " + (int)(end-start));
+			if(mAec!=null)mAec.Capture(buf, (int)(end-start));
+			start = end;
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				// TODO 自動產生的 catch 區塊
+				e.printStackTrace();
+			}
 			
 		}
 		mAudioTrack.stop();

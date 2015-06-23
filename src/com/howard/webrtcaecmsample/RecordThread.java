@@ -55,8 +55,6 @@ public class RecordThread extends Thread{
 	public void run()
 	{
 		mAudioRecord.startRecording();
-		
-
 		while(isRecording)
 		{
 			short[] buf = new short[320];
@@ -65,7 +63,7 @@ public class RecordThread extends Thread{
 			short[] out_buf = new short[320];
 			if(mAec!=null)
 			{
-				mAec.Play(buf, out_buf, 0);
+				mAec.Play(buf, out_buf);
 			}else{
 				System.arraycopy(buf, 0, out_buf, 0, out_buf.length);
 			}

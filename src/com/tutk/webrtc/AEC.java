@@ -41,7 +41,6 @@ public class AEC {
     
     private boolean isInit = false;
     private int mSampleRate;
-    //private Lock mLock = new ReentrantLock();
     private Queue<short[]> mCaptureBuffers = new LinkedList<short[]>();
     public AEC()
     {
@@ -56,8 +55,6 @@ public class AEC {
     {
         return isInit;
     }
-    
-    private long mCaptureTime;
 
     
     public boolean Create(int sampleRate)
@@ -81,17 +78,13 @@ public class AEC {
         
         if(mCaptureBuffers.size()==8)
         {
-        	mCaptureBuffers.remove();
-        	Log.d("test","FIFO remove : " + mCaptureBuffers.size());
+           	mCaptureBuffers.remove();
         }
-        
         mCaptureBuffers.add(buf);
-        Log.d("test","FIFO add : " + mCaptureBuffers.size());
-        mCaptureTime= time_ms;
         return true;
     }
     
-    public boolean Play(short[] noisy , short[] out , long delay_time)
+    public boolean Play(short[] noisy , short[] out)
     {
     	short[] cap_buf = new short[noisy.length];
     	if(mCaptureBuffers.size()>=8)
@@ -101,7 +94,7 @@ public class AEC {
 		
         int ret = -1;
         int size = noisy.length;
-        int total_time = (int) (delay_time - mCaptureTime);
+        int total_time = 0;//(int) (delay_time - mCaptureTime);
 		int residue = total_time%MIN_BUFFER_TIME_MS;
 		int timeBlockCount = total_time/MIN_BUFFER_TIME_MS;
 
