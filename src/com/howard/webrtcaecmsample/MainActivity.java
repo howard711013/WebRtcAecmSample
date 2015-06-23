@@ -3,6 +3,8 @@ package com.howard.webrtcaecmsample;
 import com.tutk.webrtc.AEC;
 
 import android.app.Activity;
+import android.media.AudioFormat;
+import android.media.AudioTrack;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -51,7 +53,7 @@ public class MainActivity extends Activity implements OnCheckedChangeListener, O
 		mPlay2.setOnClickListener(this);
 		
 		mAec = new AEC();
-		mAec.Create(SAMPLE_RATE);
+		mAec.Create(SAMPLE_RATE, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT);
 	}
 
 	@Override

@@ -12,6 +12,8 @@ import java.util.Queue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import android.media.AudioFormat;
+import android.media.AudioTrack;
 import android.util.Log;
 
 public class AEC {
@@ -39,6 +41,7 @@ public class AEC {
     private static final int BUFFER_SIZE = 80;
     private static final int MIN_BUFFER_TIME_MS = 10;
     
+    private int mFifoSize;
     private boolean isInit = false;
     private int mSampleRate;
     private Queue<short[]> mCaptureBuffers = new LinkedList<short[]>();
@@ -56,9 +59,16 @@ public class AEC {
         return isInit;
     }
 
-    
-    public boolean Create(int sampleRate)
+    /**
+     * 
+     * @param sampleRate
+     * @param size the AudioTrack minBufferSize
+     * @return
+     */
+    public boolean Create(int sampleRate , int channel , int format)
     {
+    	int minBufSize = AudioTrack.getMinBufferSize(sampleRate, channel, format)/2;
+    	mFifoSize = (int) (minBufSize * 0.5 / 40);
         mSampleRate = sampleRate;
         mHandle = nativeCreate();
         if(mHandle==-1)return false;
@@ -76,7 +86,7 @@ public class AEC {
         short[] buf = new short[input.length];
         System.arraycopy(input, 0, buf, 0, input.length);
         
-        if(mCaptureBuffers.size()==8)
+        if(mCaptureBuffers.size()==mFifoSize)
         {
            	mCaptureBuffers.remove();
         }
@@ -87,7 +97,7 @@ public class AEC {
     public boolean Play(short[] noisy , short[] out)
     {
     	short[] cap_buf = new short[noisy.length];
-    	if(mCaptureBuffers.size()>=8)
+    	if(mCaptureBuffers.size()>=mFifoSize)
     	{
     		cap_buf = mCaptureBuffers.remove();
     	}    	
